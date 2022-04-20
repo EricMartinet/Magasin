@@ -2,9 +2,7 @@ package com.martinet.metier;
 
 import java.math.BigInteger;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * Classe magasin qui permet d'emmagasiner les articles dans une Liste
@@ -83,7 +81,7 @@ public class Magasin {
 
     /**
      * Méthode qui ajoute au Magasin un article
-     * @param article
+     * @param article (Dvd ou livre)
      */
     public void ajouterArticle(Article article){
         this.articles.add(article);
@@ -92,7 +90,7 @@ public class Magasin {
     }
 
     /**
-     * Méthode qui affiche la liste des Dvd par réalisateur
+     * Méthode qui affiche la liste des Dvd (uniquement) par réalisateur
      * @param realisateur : Personne saisie
      */
     public void afficherListeParRealisateur(Personne realisateur){
@@ -110,14 +108,16 @@ public class Magasin {
         if (compteur == 0){
             System.out.println("Il n'y a pas de Dvd du réalisateur " +realisateur.getPrenom()+" "+realisateur.getNom()+
                     " dans le magasin");
+        } else {
+            System.out.println("** Le magasin possède "+compteur+" Dvd du réalisateur "+realisateur+" **");
         }
     }
 
     /**
-     * Méthode qui permet de supprimer un Article par Auteur
-     * @param auteur : est un auteur pour les Livres, ou un réalisateur pour les Dvd
+     * Méthode qui permet de supprimer tous les Articles par Auteur ou Réalisateur
+     * @param auteur pour les Livres, ou un réalisateur pour les Dvd
      */
-    public void supprimerArticlesParAuteur(Personne auteur){
+    public void supprimerTousArticlesParAuteur(Personne auteur){
         int compteur =0;
         for (Iterator it = articles.iterator(); it.hasNext(); ) {
             Article art = (Article) it.next();
@@ -145,9 +145,14 @@ public class Magasin {
             System.out.println(compteur+" article(s) supprimé(s)");
         }
     }
-    public List<Integer> afficherArticlesParAuteur(Personne auteur){
-        List<Integer> listeReferences = new ArrayList<>();
-        //boolean existe = false;
+
+    /**
+     * Affiche la liste des articles (livres ou Dvd) par auteur ou réalisateur
+     * @param auteur ou réalisteur
+     * @return une map des couples numéro de référence, Articles  correspondant
+     */
+    public Map<Integer, Article> afficherArticlesParAuteur(Personne auteur){
+        Map<Integer, Article> mapReferences = new HashMap<>();
         System.out.println("Liste des articles de "+auteur+" :");
         for (Iterator it = articles.iterator(); it.hasNext(); ) {
             Article art = (Article) it.next();
@@ -155,24 +160,22 @@ public class Magasin {
                 if ( ((Dvd) art).getRealisateur().getPrenom().equalsIgnoreCase(auteur.getPrenom())
                         && ((Dvd) art).getRealisateur().getNom().equalsIgnoreCase(auteur.getNom()) ) {
                     System.out.println(art);
-                    //existe = true;
-                    listeReferences.add(art.getReference());
+                    mapReferences.put(art.getReference(), art);
                 }
             }
             if (art instanceof Livre ) {
                 if ( ((Livre) art).getAuteur().getPrenom().equalsIgnoreCase(auteur.getPrenom())
                         && ((Livre) art).getAuteur().getNom().equalsIgnoreCase(auteur.getNom()) ) {
                     System.out.println(art);
-                    listeReferences.add(art.getReference());
-                    //existe = true;
+                    mapReferences.put(art.getReference(), art);
                 }
             }
         }
-        if (listeReferences.isEmpty()) {
+        if (mapReferences.isEmpty()) {
             System.out.println("Il n'y a pas d'article de " + auteur.getPrenom() + " " + auteur.getNom() +
                     " dans le magasin");
         }
-        return listeReferences;
+        return mapReferences;
     }
     /**
      * Méthode qui affiche la liste de tous les articles du Magasin
@@ -198,29 +201,9 @@ public class Magasin {
     }
 
     /**
-     * Méthode qui affiche le détail de l'article sélectionné
-     * @param reference : numero de reference de l'Article
-     * @return si l'article existe (booleen)
-     */
-   public boolean afficherArticle(String message, int reference){
-       boolean articleExiste = false;
-       for (int i = 0; i<this.articles.size() && !articleExiste; i++) {
-            if (articles.get(i).getReference().intValue() == reference) {
-                System.out.println(message);
-                System.out.println(articles.get(i).toString());
-                articleExiste = true;
-            }
-       }
-       if (reference != 0 && !articleExiste){
-           System.out.println("Il n'y a pas d'article ayant comme numéro de référence : "+reference);
-       }
-       return articleExiste;
-   }
-
-    /**
-     *
-     * @param reference
-     * @return
+     * Permet de supprimer un article avec :
+     * @param reference : numéro de reference de l'article
+     * @return true si supprimé, false sinon
      */
     public boolean supprimerArticle(int reference){
         boolean trouve = false;
@@ -238,69 +221,30 @@ public class Magasin {
         }
         return trouve;
     }
+
     /**
-     * Méthode qui modifie la désignation d'un article
-     * @param reference numéro unique de l'article
+     * Méthode qui retourne l'article présent dans le magasin qui a pour référence celle passée en parametre
+     * @param reference
+     * @return Article si existe, null sinon
      */
-    public void modifierArticle(int reference, String nouvelleDesignation){
-        Iterator it = this.articles.iterator();
-        boolean trouve = false;
-        while (it.hasNext() && !trouve){
+    public Article getArticle(int reference){
+        Iterator it = articles.iterator();
+
+        while (it.hasNext()) {
             Article art = (Article) it.next();
-            if (art.getReference() == reference){
-                art.setDesignation(nouvelleDesignation);
-                trouve = true;
+            if (art.getReference()== reference) {
+                return art;
             }
         }
-    }
-    public void modifierArticle(int reference, Double prix){
-        Iterator it = this.articles.iterator();
-        boolean trouve = false;
-        while (it.hasNext() && !trouve){
-            Article art = (Article) it.next();
-            if (art.getReference() == reference){
-                art.setPrix(prix);
-                trouve = true;
-            }
-        }
+        return null;
     }
 
-    public void modifierArticle(int reference, Personne nouvellePersonne) {
-        Iterator it = this.articles.iterator();
-        boolean trouve = false;
-        while (it.hasNext() && !trouve){
-            Article art = (Article) it.next();
-            if (art.getReference() == reference){
-                trouve = true;
-                if (art instanceof Dvd){
-                    ((Dvd) art).setRealisateur(nouvellePersonne);
-                }
-                if (art instanceof Livre){
-                    ((Livre) art).setAuteur(nouvellePersonne);
-                }
-            }
-        }
-    }
-    public void modifierArticle(int refArticleAModifier, BigInteger nouvelIsbn) {
-        Iterator it = this.articles.iterator();
-        boolean trouve = false;
-        while (it.hasNext() && !trouve){
-            Article art = (Article) it.next();
-            if (art.getReference() == refArticleAModifier) {
-                trouve = true;
-                if (art instanceof Livre) {
-                    ((Livre) art).setIsbn(nouvelIsbn);
-                } else {
-                    System.out.println("Un Dvd n'a pas d'Isbn...");
-                }
-            }
-        }
-    }
     /**
      * Méthode qui permet de vider entièrement le magasin
      */
     public void viderMagasin(){
-        //Iterator iterArticles = articles.iterator();
+        // Pour éviter ConcurrentModificationException, implémenter un itérator :
+        // Iterator iterArticles = articles.iterator();
         //while (iterArticles.hasNext()){
         //    Article art = (Article) iterArticles.next();
         //    iterArticles.remove();
@@ -309,7 +253,4 @@ public class Magasin {
         articles.clear();
         System.out.println("Vous avez supprimé tous les articles du magasin");
     }
-
-
-
 }

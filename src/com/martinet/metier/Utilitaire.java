@@ -3,6 +3,7 @@ package com.martinet.metier;
 import java.math.BigInteger;
 import java.util.InputMismatchException;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Scanner;
 
 /**
@@ -10,7 +11,9 @@ import java.util.Scanner;
  * utiles pour l'Application de gestion de Magasin qui contient des Articles (Livre, Dvd)
  */
 public class Utilitaire {
-
+    /**
+     * Méthode d'affichage du Menu général d'accueil
+     */
     public static void afficherMenu(){
         System.out.println();
         System.out.println("MENU");
@@ -24,6 +27,39 @@ public class Utilitaire {
         System.out.println("6. Supprimer toute la liste");
         System.out.println("0. Quitter");
         System.out.println("Entrez votre choix (1, 2, 3, 4, 5, 6, 0 pour quitter): ");
+    }
+    /**
+     * Méthode qui affiche les choix dans le sous menu de Suppression d'un article
+     */
+    public static void afficherListeChoixSuppression(Personne createur) {
+        System.out.println("---------------------------------------------------------------");
+        System.out.println("SOUS-MENU de Suppression d'un article de : "+createur);
+        System.out.println("---------------------------------------------------------------");
+        System.out.println("Saisir le numero de référence de l'article à supprimer");
+        System.out.println("Pour supprimer tous les articles de l'auteur taper T");
+        System.out.println("Pour revenir au menu principal taper 0");
+        System.out.println("Saisissez votre choix : ");
+    }
+    /**
+     * Méthode qui affiche les choix des champs à modifier
+     * en fonction du type d'Article sélectionné
+     */
+    public static void afficherListeChoixModification(Article article) {
+        System.out.println("--------------------------------------------");
+        System.out.println("SOUS-MENU de Modification de l 'article "+article.getReference());
+        System.out.println("--------------------------------------------");
+        System.out.println("1. Modifier le titre");
+        System.out.println("2. Modifier le prix");
+        System.out.println("3. Modifier l'auteur ou le réalisateur");
+        if (article instanceof Livre) {
+            System.out.println("4. Modifier l'isbn du livre tapez 4");
+        }
+        System.out.println("0. Menu principal");
+        if (article instanceof Livre) {
+            System.out.println("Saisissez 1, 2, 3, 4 ou 0 pour revenir au menu principal :");
+        } else {
+            System.out.println("Saisissez 1, 2, 3 ou 0 pour revenir au menu principal :");
+        }
     }
 
     /**
@@ -42,6 +78,13 @@ public class Utilitaire {
         }
         return choix;
     }
+
+    /**
+     * Méthode qui permet d'afficher un message de saisie avec le libellé passé en parametre
+     * et lit un BigInteger saisit
+     * @param libelle
+     * @return un BigInteger
+     */
     public static BigInteger lireSaisieBigInteger(String libelle){
         System.out.println("Saisissez "+libelle);
         Scanner saisie = new Scanner(System.in);
@@ -60,6 +103,13 @@ public class Utilitaire {
         }
         return isbn;
     }
+
+    /**
+     * Méthode qui vérifie la validité de l'isbn saisi (13 positions, commençant par 978)
+     * @param isbn : le numéro isbn à vérifier
+     * @return true si isbn est valide, false sinon
+     * @throws IsbnException
+     */
     public static boolean checkIsbn(BigInteger isbn) throws IsbnException{
        boolean isbnValide = false;
         BigInteger isbnMini = new BigInteger("1000000000000");
@@ -110,7 +160,21 @@ public class Utilitaire {
         System.out.println("Entrez "+champ+" : ");
         return saisie.nextLine();
     }
-
+    /**
+     * Méthode qui permet l'affichage d'un message puis la saisie d'un
+     * @param champ chaine de caractère obligatoire
+     * @return la lecture de la chaine de caractere saisie
+     */
+    public static String lireSaisieStringObligatoire(String champ){
+        Scanner saisie = new Scanner(System.in);
+        System.out.println("Entrez "+champ+" : ");
+        String mot = saisie.nextLine();
+        while (mot == ""){
+            System.out.println(champ+" obligatoire ===> ");
+            mot = saisie.nextLine();
+        }
+        return mot;
+    }
     /**
      * Méthode qui lit la saisie du choix de suppression et boucle en récursivité tant que la saisie
      * n'est ni "T", ni un entier
@@ -144,21 +208,7 @@ public class Utilitaire {
         }
         return choixString;
     }
-    /**
-     * Méthode qui permet l'affichage d'un message puis la saisie d'un
-     * @param champ chaine de caractère obligatoire
-     * @return la lecture de la chaine de caractere saisie
-     */
-    public static String lireSaisieStringObligatoire(String champ){
-        Scanner saisie = new Scanner(System.in);
-        System.out.println("Entrez "+champ+" : ");
-        String mot = saisie.nextLine();
-        while (mot == ""){
-            System.out.println(champ+" obligatoire ===> ");
-            mot = saisie.nextLine();
-        }
-        return mot;
-    }
+
 
     /**
      * Méthode qui permet d'afficher les messages de saisie et de lire les saisie des données pour créer
@@ -210,32 +260,6 @@ public class Utilitaire {
         System.out.println("Saisissez le numéro de référence de l'article à modifier (ou 0 pour annuler):");
         return lireSaisieInt();
     }
-    /**
-     * Méthode qui affiche les choix dans le sous menu de Suppression d'un article
-     */
-    public static void afficherListeChoixSuppression(Personne createur) {
-        System.out.println("---------------------------------------------------------------");
-        System.out.println("SOUS-MENU de Suppression d'un article de :"+createur);
-        System.out.println("---------------------------------------------------------------");
-        System.out.println("Saisir le numero de référence de l'article à supprimer");
-        System.out.println("Pour supprimer tous les articles de l'auteur taper T");
-        System.out.println("Pour revenir au menu principal taper 0");
-        System.out.println("Saisissez votre choix : ");
-    }
-    /**
-     * Méthode qui affiche les choix des champs à modifier
-     */
-    public static void afficherListeChoixModification() {
-        System.out.println("----------------------------------------");
-        System.out.println("SOUS-MENU de Modification d'un article :");
-        System.out.println("----------------------------------------");
-        System.out.println("1. Modifier le titre");
-        System.out.println("2. Modifier le prix");
-        System.out.println("3. Modifier l'auteur ou le réalisateur");
-        System.out.println("4. Modifier l'isbn du livre tapez 4");
-        System.out.println("0. Menu principal");
-        System.out.println("Saisissez 1, 2, 3, 4 ou 0 pour revenir au menu principal :");
-    }
 
     /**
      * Méthode qui affiche le message de clotûre
@@ -245,9 +269,32 @@ public class Utilitaire {
         System.out.println("Bye là !");
     }
 
+    /**
+     * Affiche message d'erreur de suppression de l'article avec pour réference :
+     * @param ref
+     */
     public static void afficherMessageErreurSupp(int ref) {
         System.out.println("L'article avec reference "+ref+" ne fait pas partie de" +
                 "la liste des articles de l'auteur");
     }
 
+    /**
+     * Affiche la liste la map des références et des articles
+     * @param map <numéro de réféence, article (Dvd ou Livre)
+     */
+    public static void afficherMap(Map<Integer, Article> map){
+        System.out.println("Autres articles du même auteur: ");
+        map.forEach((ref, art) -> {
+            System.out.println(ref+". "+art);
+                }
+        );
+    }
+public static void afficherArticle(String message, Article art){
+    System.out.println(message);
+    if (art != null) {
+        System.out.println(art);
+    } else {
+        System.out.println("*** il n'y a pas d'article ayant la référence "+art.getReference()+" dans le magasin ***");
+    }
+}
 }
